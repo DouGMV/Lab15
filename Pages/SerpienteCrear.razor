@@ -1,0 +1,116 @@
+﻿@page "/Serpiente-crear"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Serpiente</h3>
+
+<EditForm Model="@serpiente" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="form-group">
+        <label for="Nombre">Nombre del animal</label>
+        <InputText id="Nombre" @bind-Value="serpiente.Nombre" class="form-control" />
+        <ValidationMessage For="() => serpiente.Nombre" />
+    </div>
+    <div class="form-group">
+        <label for="Especie">Especie del animal</label>
+        <InputText id="Especie" @bind-Value="serpiente.Especie" class="form-control" />
+        <ValidationMessage For="() => serpiente.Especie" />
+    </div>
+    <div class="form-group">
+        <label for="Alimentacion">Alimentacion del animal</label>
+        <InputText id="Alimentacion" @bind-Value="serpiente.Alimentacion" class="form-control" />
+        <ValidationMessage For="() => serpiente.Alimentacion" />
+    </div>
+    <div class="form-group">
+        <label for="TiempoVida">Tiempo de vida del animal</label>
+        <InputText id="TiempoVida" @bind-Value="serpiente.TiempoVida" class="form-control" />
+        <ValidationMessage For="() => serpiente.TiempoVida" />
+    </div>
+    <div class="form-group">
+        <label for="Veneno">Veneno de la serpiente</label>
+        <InputText id="Veneno" @bind-Value="serpiente.Veneno" class="form-control" />
+        <ValidationMessage For="() => serpiente.Veneno" />
+    </div>
+    <div class="form-group">
+        <label for="Longitud">Longitud de la serpiente</label>
+        <InputText id="Longitud" @bind-Value="serpiente.Longitud" class="form-control" />
+        <ValidationMessage For="() => serpiente.Longitud" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</EditForm>
+
+@if (serpientes != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Especie</th>
+                <th>Alimentacion</th>
+                <th>TiempoVida</th>
+                <th>Veneno</th>
+                <th>Longitud</th>
+                <th>Eliminar</th>
+                <th>Editar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var serpiente in serpientes)
+            {
+                <tr>
+                    <td>@serpiente.Nombre</td>
+                    <td>@serpiente.Especie</td>
+                    <td>@serpiente.Alimentacion</td>
+                    <td>@serpiente.TiempoVida</td>
+                    <td>@serpiente.Veneno</td>
+                    <td>@serpiente.Longitud</td>
+                    <td>
+                        <button class="btn btn-danger"
+                                @onclick="@(() => BorrarSerpiente(serpiente.Veneno))">
+                            Eliminar
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning"
+                                @onclick="@(() => NavigationManager.NavigateTo($"/serpiente-editar/{serpiente.Veneno}"))">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Serpientes serpiente = new Serpientes();
+    List<Serpientes> serpientes = new List<Serpientes>();
+
+
+    protected async Task Guardar()
+    {
+        serpientes.Add(serpiente);
+
+        await localStorage.SetItemAsync("serpientes", serpientes);
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        serpientes = await localStorage.GetItemAsync<List<Serpientes>>("serpientes");
+        if (serpientes == null)
+            serpientes = new List<Serpientes>();
+    }
+
+    protected async Task BorrarSerpiente(string Veneno)
+    {
+        serpientes.Remove(serpientes.First(c => c.Veneno == Veneno));
+        await localStorage.SetItemAsync("serpientes", serpientes);
+
+    }
+}
